@@ -1,8 +1,11 @@
 <?xml version="1.0"?>
 
 <sdf version='1.6'>
-  <model name='TinyRobot'>
+  <model name='TinyRobot1'>
     <plugin name="slotcar" filename="libslotcar.so">
+    
+      <robot_name>TinyRobot1</robot_name>
+      <level_name>L1</level_name>
 
       <nominal_drive_speed>0.5</nominal_drive_speed>
       <nominal_drive_acceleration>0.25</nominal_drive_acceleration>

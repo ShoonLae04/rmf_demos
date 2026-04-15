@@ -1,0 +1,60 @@
+# The configuration file for docking actions that robots can perform
+# FleetName: The name of the fleet
+#   DockName: The name of the docking waypoint
+#     level_name: The level name
+#     path: The waypoints that the robot will pass through during the docking process
+#     finish_waypoint: The name of the waypoint where the robot will end up at the end of the docking process
+#
+# Note: These waypoints are in (x meters, y meters, yaw radian) form
+#
+# If loaded correctly, you will be able to echo the msg via:
+#   ros2 topic echo /dock_summary --qos-durability transient_local --qos-reliability reliable
+#
+# Configuring Cleaning path:
+#    The full cleaning path which the robot will travel along. When configuring, the first
+#    waypoint is required to be the current robot's waypoint.
+
+cleanerBotA:
+  clean_inno_room:
+    level_name: "L1"
+    # Note: These waypoints are in (x meters, y meters, yaw radian) form
+    # Working Points, but crashing into walls
+    # path: [ [54.90, -21.30, 0.0],
+    #         [57.00, -19.77, 0.0],
+    #         [58.55, -21.45, 0.0],
+    #         [60.62, -20.53, 0.0],
+    #         [61.9, -19.67, 0.0],
+    #         [59.73, -19.01, 0.0],
+    #         [61.05, -17.54, 0.0],
+    #         [56.79, -17.48, 0.0]
+    #         ] 
+    # Testing 
+    path: [ [75.55, -28.35, 0.0], 
+            [76.04, -26.72, 0.0],
+            [79.86, -26.72, 0.0],
+            [79.62, -24.13, 0.0],
+            [81.97, -24.45, 0.0]  
+    ]
+    finish_waypoint: "clean_inno_room"
+    
+  clean_conference_room:
+    level_name: "L1"
+    # four corner points in the conference room are
+    #[53.80580, -25.7752, 0.0],  [53.80580, -40.8869, 0.0], [61.3609, -40.8869, 0.0], [61.3609, -25.7752], -29.7752, 0.0], [57.80580, -25.7752, 0.0]
+
+
+    path: [ [80.51, -40.62, 0.0],
+            [79.70, -45.33, 0.0],
+            [80.60, -52.48, 0.0],
+            [77.02, -53.05, 0.0],
+            [73.50, -52.50, 0.0],
+            [74.17, -48.82, 0.0],
+            [73.28, -44.92, 0.0],
+            [74.25, -42.00, 0.0],
+            [73.20, -38.80, 0.0],
+            [73.77, -36.00, 0.0],
+            [76.03, -36.05, 0.0],
+            [78.05, -36.95, 0.0],
+            [80.00, -38.20, 0.0]
+    ]
+    finish_waypoint: "conference_room"
