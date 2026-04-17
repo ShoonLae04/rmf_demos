@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<sdf version="1.7">
+  <model name="barrel">
+    <static>true</static>
+    <link name="link">
+      <pose>0 0 0.45 0 0 0</pose>
+      <collision name="collision">
+        <geometry>
+          <cylinder>
+            <radius>0.22</radius>
+            <length>0.9</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <cylinder>
+            <radius>0.22</radius>
+            <length>0.9</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.65 0.25 0.1 1.0</ambient>
+          <diffuse>0.65 0.25 0.1 1.0</diffuse>
+          <specular>0.2 0.1 0.05 1.0</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

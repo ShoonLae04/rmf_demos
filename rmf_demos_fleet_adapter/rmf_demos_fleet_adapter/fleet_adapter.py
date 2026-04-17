@@ -90,11 +90,19 @@ def initialize_fleet(config_yaml, nav_graph_path, node, use_sim_time):
 
     # Adapter
     fleet_name = fleet_config['name']
-    adapter = adpt.Adapter.make(f'{fleet_name}_fleet_adapter')
+    adapter = None
+    while adapter is None:
+        try:
+            adapter = adpt.Adapter.make(f'{fleet_name}_fleet_adapter')
+        except Exception as exc:
+            node.get_logger().warn(
+                f"Unable to initialize fleet adapter yet for [{fleet_name}]: {exc}. "
+                "Waiting for RMF Schedule Node...")
+            time.sleep(1.0)
+            continue
+
     if use_sim_time:
         adapter.node.use_sim_time()
-    assert adapter, ("Unable to initialize fleet adapter. Please ensure "
-                     "RMF Schedule Node is running")
     adapter.start()
     time.sleep(1.0)
 

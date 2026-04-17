@@ -82,6 +82,7 @@ foreach(path ${traffic_editor_paths})
   add_custom_command(
     OUTPUT ${ign_output_world_path}
     COMMAND ros2 run rmf_building_map_tools building_map_generator ignition ${map_path} ${ign_output_world_path} ${ign_output_model_dir}
+    COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/scripts/insert_ign_sensors_plugin.py ${ign_output_world_path}
     DEPENDS ${map_path}
   )
 

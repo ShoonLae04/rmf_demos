@@ -217,6 +217,30 @@
           </friction>
         </surface>
       </collision>
+
+      <sensor name='front_laser' type='gpu_lidar'>
+        <pose frame=''>0.08 0 0.22 0 0 0</pose>
+        <always_on>1</always_on>
+        <update_rate>10</update_rate>
+        <visualize>false</visualize>
+        <topic>/scan</topic>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>360</samples>
+              <resolution>1</resolution>
+              <min_angle>-1.5708</min_angle>
+              <max_angle>1.5708</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.05</min>
+            <max>8.0</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+      </sensor>
+
       <visual name='base_footprint_fixed_joint_lump__base_link_visual'>
         <pose frame=''>-0.11 0 0.071 0 -0 0</pose>
         <geometry>
