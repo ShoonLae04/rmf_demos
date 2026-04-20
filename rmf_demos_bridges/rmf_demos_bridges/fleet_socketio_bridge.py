@@ -76,11 +76,11 @@ class FleetSocketIOBridge(Node):
                             required=False,
                             type=str,
                             help='SocketIO topic to publish GPS.')
-            parser.add_argument('-a', '--alert_topic',
-                        required=False,
-                        type=str,
-                        default='/rmf_demo_alerts',
-                        help='SocketIO topic to publish alerts.')
+        parser.add_argument('-a', '--alert_topic',
+                    required=False,
+                    type=str,
+                    default='/rmf_demo_alerts',
+                    help='SocketIO topic to publish alerts.')
         parser.add_argument('-x', '--offset_x',
                             required=False,
                             type=float,
