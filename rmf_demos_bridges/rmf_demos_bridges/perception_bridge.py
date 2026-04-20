@@ -210,6 +210,14 @@ class PerceptionBridge(Node):
             'obstacle_type': alert_type,
             'obstacle_name': entity['name'],
             'distance_estimate': round(distance, 3),
+            'obstacle_position': {
+                'x': round(float(entity['x']), 3),
+                'y': round(float(entity['y']), 3),
+            },
+            'robot_position': {
+                'x': round(float(robot['x']), 3),
+                'y': round(float(robot['y']), 3),
+            },
             'recommended_action': self._recommended_action(alert_type),
             'robot_mode': robot.get('mode_name', 'unknown'),
             'source': 'perception_bridge',
