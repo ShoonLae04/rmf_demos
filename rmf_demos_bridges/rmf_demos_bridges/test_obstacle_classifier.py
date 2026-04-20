@@ -22,8 +22,12 @@ class TestObstacleClassifier(Node):
                     help='DispatchStates topic used to infer active clean task assignments')
         parser.add_argument('--task-api-response-topic', default='/task_api_responses',
                     help='ApiResponse topic used to discover clean task IDs')
-        parser.add_argument('--mode', default='task_aware', choices=['task_aware', 'manual', 'fixed', 'distance', 'robot'],
+        parser.add_argument('--mode', default='perception_first', choices=['perception_first', 'task_aware', 'manual', 'fixed', 'distance', 'robot'],
                             help='Classification mode for test labels')
+        parser.add_argument('--task-aware-clean-type', default='puddle',
+                    help='Type emitted in task_aware mode when robot has an active clean task')
+        parser.add_argument('--task-aware-idle-type', default='unknown_obstacle',
+                    help='Type emitted in task_aware mode when robot has no active clean task')
         parser.add_argument('--fixed-type', default='intruder', choices=['intruder', 'puddle'],
                             help='Type used when mode=fixed')
         parser.add_argument('--distance-intruder-threshold', type=float, default=0.8,
@@ -89,12 +93,19 @@ class TestObstacleClassifier(Node):
             return ''
         return robot_name.strip().lower()
 
-    def _classify(self, robot_name: str, distance: float) -> tuple[str, str]:
+    def _classify(self, robot_name: str, distance: float, incoming_type: str) -> tuple[str, str]:
+        normalized_type = (incoming_type or '').strip().lower()
+
+        if self.args.mode == 'perception_first':
+            if normalized_type and normalized_type != 'unknown_obstacle':
+                return normalized_type, 'perception_first_passthrough'
+            return self.args.task_aware_idle_type, 'perception_first_unknown'
+
         if self.args.mode == 'task_aware':
             robot_key = self._robot_key(robot_name)
             if robot_key in self._active_clean_tasks:
-                return 'puddle', 'task_aware_active_clean_task'
-            return 'intruder', 'task_aware_not_clean_task'
+                return self.args.task_aware_clean_type, 'task_aware_active_clean_task'
+            return self.args.task_aware_idle_type, 'task_aware_not_clean_task'
 
         if self.args.mode == 'manual':
             robot_key = self._robot_key(robot_name)
@@ -215,11 +226,12 @@ class TestObstacleClassifier(Node):
             return
 
         obstacle_type = alert.get('obstacle_type', 'unknown_obstacle')
-        if not self.args.relabel_known and obstacle_type != 'unknown_obstacle' and self.args.mode != 'manual':
+        if not self.args.relabel_known and obstacle_type != 'unknown_obstacle' \
+            and self.args.mode not in ('manual', 'perception_first'):
             return
 
         distance = float(alert.get('distance_estimate', 999.0))
-        label, reason = self._classify(robot_name, distance)
+        label, reason = self._classify(robot_name, distance, obstacle_type)
 
         now = time.time()
         key = self._robot_key(robot_name)

@@ -47,6 +47,19 @@ class ScanObstacleDetector(Node):
                     help='Topic carrying obstacle classification JSON per robot')
         parser.add_argument('--classification-ttl-sec', type=float, default=3.0,
                     help='Seconds to keep latest obstacle classification for each robot')
+        parser.add_argument('--emit-static-structure-label', dest='emit_static_structure_label',
+                    action='store_true',
+                    help='Tag persistent scan returns as static structures')
+        parser.add_argument('--no-emit-static-structure-label', dest='emit_static_structure_label',
+                    action='store_false',
+                    help='Do not tag persistent scan returns as static structures')
+        parser.set_defaults(emit_static_structure_label=True)
+        parser.add_argument('--static-hit-threshold', type=int, default=6,
+                    help='Consecutive stable hits needed to label static structures')
+        parser.add_argument('--static-distance-epsilon', type=float, default=0.15,
+                    help='Max range delta (m) between hits to consider them static')
+        parser.add_argument('--static-obstacle-type', default='static_structure',
+                    help='Obstacle type used for persistent static returns')
         parser.add_argument('--robot-name', default='',
                             help='Optional robot name to include in alerts')
 
@@ -67,6 +80,7 @@ class ScanObstacleDetector(Node):
         self._alert_pub = self.create_publisher(String, self.args.alert_topic, 10)
         self._scan_subscriptions = {}
         self._consecutive_hits = {}
+        self._static_hits = {}
         self._last_alert_times = {}
         self._robot_velocities = {}
         self._obstacle_labels = {}
@@ -337,6 +351,22 @@ class ScanObstacleDetector(Node):
         obstacle_type = 'unknown_obstacle'
         if classification:
             obstacle_type = classification['obstacle_type']
+        else:
+            static_key = (self._normalized_robot_name(robot_name), scan_topic, sector)
+            static_state = self._static_hits.get(static_key)
+            if static_state is None:
+                static_state = {'distance': min_distance, 'count': 1}
+            else:
+                if abs(min_distance - static_state['distance']) <= self.args.static_distance_epsilon:
+                    static_state['count'] += 1
+                else:
+                    static_state['count'] = 1
+                    static_state['distance'] = min_distance
+            self._static_hits[static_key] = static_state
+
+            if self.args.emit_static_structure_label and \
+                    static_state['count'] >= max(2, self.args.static_hit_threshold):
+                obstacle_type = self.args.static_obstacle_type
 
         payload = {
             'timestamp': now,
