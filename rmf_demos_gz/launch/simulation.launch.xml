@@ -60,4 +60,21 @@
     args="/scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan"
     />
 
+  <node pkg="ros_ign_bridge" exec="parameter_bridge"
+    args="/tinyrobot_scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan"
+    />
+
+  <node pkg="ros_ign_bridge" exec="parameter_bridge"
+    args="/cleanerbota_scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan"
+    />
+
+  <!-- Bridge scoped laser topics so each robot has its own scan stream -->
+  <node pkg="ros_ign_bridge" exec="parameter_bridge"
+    args="/model/TinyRobot1/link/base_footprint/sensor/front_laser/scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan"
+    />
+
+  <node pkg="ros_ign_bridge" exec="parameter_bridge"
+    args="/model/cleanerBotA_1/link/base_footprint/sensor/front_laser/scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan"
+    />
+
 </launch>

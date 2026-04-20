@@ -10,17 +10,25 @@
   <arg name="trigger_on_any_nearby" default="false"/>
   <arg name="use_cleaner_fleet" default="true"/>
   <arg name="use_mock_docker" default="true"/>
-  <arg name="use_scan_obstacle_detector" default="false"/>
-  <arg name="scan_topic" default="/scan"/>
+  <arg name="use_scan_obstacle_detector" default="true"/>
+  <arg name="scan_topic" default="/tinyrobot_scan"/>
   <arg name="scan_min_consecutive_hits" default="2"/>
   <arg name="scan_auto_discover" default="true"/>
-  <arg name="scan_topic_regex" default=".*scan$"/>
-  <arg name="scan_require_motion" default="false"/>
+  <arg name="scan_topic_regex" default="^(?!/scan$).*scan$"/>
+  <arg name="scan_require_motion" default="true"/>
   <arg name="scan_motion_velocity_threshold" default="0.05"/>
-  <arg name="use_test_obstacle_classifier" default="false"/>
-  <arg name="test_classifier_mode" default="task_aware"/>
+  <arg name="use_test_obstacle_classifier" default="true"/>
+  <arg name="test_classifier_mode" default="perception_first"/>
+  <arg name="test_classifier_task_aware_clean_type" default="puddle"/>
+  <arg name="test_classifier_task_aware_idle_type" default="unknown_obstacle"/>
   <arg name="test_classifier_fixed_type" default="intruder"/>
   <arg name="test_classifier_ground_truth_topic" default="/obstacle_ground_truth"/>
+  <arg name="use_incident_task_dispatcher" default="true"/>
+  <arg name="incident_clean_zone" default="clean_inno_room"/>
+  <arg name="incident_enabled_obstacle_types" default="puddle,water_puddle"/>
+  <arg name="incident_dispatch_cooldown_sec" default="180.0"/>
+  <arg name="incident_allow_while_clean_active" default="false"/>
+  <arg name="incident_min_confidence" default="0.6"/>
   <arg name="viz_initial_map" default="L1"/>
   <let name="simulation_map_name" value="$(var map_name)"/>
 
@@ -113,21 +121,33 @@
   <node pkg="rmf_demos_bridges" exec="perception_bridge" output="screen" args="$(var perception_bridge_args)"/>
 
   <group if="$(var use_scan_obstacle_detector)">
-      <let name="scan_discovery_flag" value="--no-auto-discover-scans"/>
-      <let name="scan_discovery_flag" if="$(var scan_auto_discover)" value="--auto-discover-scans"/>
     <let name="scan_motion_flag" value=""/>
     <let name="scan_motion_flag" if="$(var scan_require_motion)" value="--require-motion --motion-velocity-threshold $(var scan_motion_velocity_threshold)"/>
     <node pkg="rmf_demos_bridges"
           exec="scan_obstacle_detector"
           output="screen"
-          args="--scan-topic $(var scan_topic) --min-consecutive-hits $(var scan_min_consecutive_hits) --scan-topic-regex $(var scan_topic_regex) $(var scan_discovery_flag) $(var scan_motion_flag)"/>
+        args="--scan-topic $(var scan_topic) --min-consecutive-hits $(var scan_min_consecutive_hits) --no-auto-discover-scans $(var scan_motion_flag) --robot-name TinyRobot1 --classification-topic /obstacle_classifications"/>
+
+      <node pkg="rmf_demos_bridges"
+        exec="scan_obstacle_detector"
+        output="screen"
+        args="--scan-topic /cleanerbota_scan --min-consecutive-hits $(var scan_min_consecutive_hits) --no-auto-discover-scans $(var scan_motion_flag) --robot-name cleanerBotA_1 --classification-topic /obstacle_classifications"/>
   </group>
 
   <group if="$(var use_test_obstacle_classifier)">
     <node pkg="rmf_demos_bridges"
           exec="test_obstacle_classifier"
           output="screen"
-          args="--mode $(var test_classifier_mode) --fixed-type $(var test_classifier_fixed_type) --ground-truth-topic $(var test_classifier_ground_truth_topic)"/>
+          args="--mode $(var test_classifier_mode) --task-aware-clean-type $(var test_classifier_task_aware_clean_type) --task-aware-idle-type $(var test_classifier_task_aware_idle_type) --fixed-type $(var test_classifier_fixed_type) --ground-truth-topic $(var test_classifier_ground_truth_topic)"/>
+  </group>
+
+  <group if="$(var use_incident_task_dispatcher)">
+    <let name="incident_allow_active_flag" value=""/>
+    <let name="incident_allow_active_flag" if="$(var incident_allow_while_clean_active)" value="--allow-while-clean-active"/>
+    <node pkg="rmf_demos_bridges"
+          exec="incident_task_dispatcher"
+          output="screen"
+          args="--clean-zone $(var incident_clean_zone) --enabled-obstacle-types $(var incident_enabled_obstacle_types) --cooldown-sec $(var incident_dispatch_cooldown_sec) --min-confidence $(var incident_min_confidence) $(var incident_allow_active_flag)"/>
   </group>
 
 </launch>
