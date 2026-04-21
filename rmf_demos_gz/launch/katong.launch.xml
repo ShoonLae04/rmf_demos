@@ -29,6 +29,8 @@
   <arg name="incident_dispatch_cooldown_sec" default="180.0"/>
   <arg name="incident_allow_while_clean_active" default="false"/>
   <arg name="incident_min_confidence" default="0.6"/>
+  <arg name="incident_resume_clean_after_local_response" default="true"/>
+  <arg name="incident_remove_entity_on_clean" default="true"/>
   <arg name="viz_initial_map" default="L1"/>
   <let name="simulation_map_name" value="$(var map_name)"/>
 
@@ -144,10 +146,14 @@
   <group if="$(var use_incident_task_dispatcher)">
     <let name="incident_allow_active_flag" value=""/>
     <let name="incident_allow_active_flag" if="$(var incident_allow_while_clean_active)" value="--allow-while-clean-active"/>
+      <let name="incident_resume_flag" value=""/>
+      <let name="incident_resume_flag" if="$(var incident_resume_clean_after_local_response)" value="--resume-clean-after-local-response"/>
+      <let name="incident_remove_flag" value=""/>
+      <let name="incident_remove_flag" if="$(var incident_remove_entity_on_clean)" value="--remove-entity-on-clean"/>
     <node pkg="rmf_demos_bridges"
           exec="incident_task_dispatcher"
           output="screen"
-          args="--clean-zone $(var incident_clean_zone) --enabled-obstacle-types $(var incident_enabled_obstacle_types) --cooldown-sec $(var incident_dispatch_cooldown_sec) --min-confidence $(var incident_min_confidence) $(var incident_allow_active_flag)"/>
+        args="--clean-zone $(var incident_clean_zone) --enabled-obstacle-types $(var incident_enabled_obstacle_types) --cooldown-sec $(var incident_dispatch_cooldown_sec) --min-confidence $(var incident_min_confidence) $(var incident_allow_active_flag) $(var incident_resume_flag) $(var incident_remove_flag)"/>
   </group>
 
 </launch>
