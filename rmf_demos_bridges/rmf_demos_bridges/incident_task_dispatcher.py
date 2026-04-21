@@ -17,7 +17,7 @@ from rclpy.qos import QoSProfile
 from rclpy.qos import QoSDurabilityPolicy as Durability
 from rclpy.qos import QoSHistoryPolicy as History
 from rclpy.qos import QoSReliabilityPolicy as Reliability
-from rmf_task_msgs.msg import ApiRequest, DispatchStates
+from rmf_task_msgs.msg import ApiRequest, ApiResponse, DispatchStates
 from std_msgs.msg import String
 
 
@@ -66,6 +66,10 @@ class IncidentTaskDispatcher(Node):
                     help='Ignition world name used when removing puddle model')
         parser.add_argument('--remove-entity-on-clean', action='store_true',
                     help='Attempt to remove puddle model from simulation after clean completes')
+        parser.add_argument('--task-api-response-topic', default='/task_api_responses',
+                    help='Task API response topic used to track clean task context')
+        parser.add_argument('--strict-resume-mode', action='store_true',
+                    help='Resume cleaner work using last active clean zone first before fallback')
 
         self.args, _ = parser.parse_known_args(argv[1:])
         super().__init__('incident_task_dispatcher')
@@ -107,6 +111,11 @@ class IncidentTaskDispatcher(Node):
             self.args.dispatch_states_topic,
             self._dispatch_states_callback,
             10)
+        self._task_api_response_sub = self.create_subscription(
+            ApiResponse,
+            self.args.task_api_response_topic,
+            self._task_api_response_callback,
+            10)
         self._fleet_states_sub = self.create_subscription(
             FleetState,
             self.args.fleet_states_topic,
@@ -116,6 +125,8 @@ class IncidentTaskDispatcher(Node):
         self._last_dispatch_time = {}
         self._active_clean_task_ids = set()
         self._active_clean_task_robot_keys = set()
+        self._clean_task_context_by_id = {}
+        self._active_clean_task_context_by_robot = {}
         self._active_cleaning_work = {}
         self._robot_positions = {}
         self._next_cmd_id = {}
@@ -128,6 +139,7 @@ class IncidentTaskDispatcher(Node):
     def _dispatch_states_callback(self, msg: DispatchStates):
         active_clean_ids = set()
         active_clean_robot_keys = set()
+        active_clean_context_by_robot = {}
         for state in msg.active:
             if state.status not in (2, 3):
                 continue
@@ -138,9 +150,35 @@ class IncidentTaskDispatcher(Node):
                 active_clean_ids.add(task_id)
                 robot_name = state.assignment.expected_robot_name.strip()
                 if robot_name:
-                    active_clean_robot_keys.add(self._robot_key(robot_name))
+                    robot_key = self._robot_key(robot_name)
+                    active_clean_robot_keys.add(robot_key)
+                    if task_id in self._clean_task_context_by_id:
+                        active_clean_context_by_robot[robot_key] = self._clean_task_context_by_id[task_id]
         self._active_clean_task_ids = active_clean_ids
         self._active_clean_task_robot_keys = active_clean_robot_keys
+        for robot_key, context in active_clean_context_by_robot.items():
+            self._active_clean_task_context_by_robot[robot_key] = context
+
+    def _task_api_response_callback(self, msg: ApiResponse):
+        payload = self._decode_json(msg.json_msg)
+        if payload is None:
+            return
+
+        state = payload.get('state', {})
+        if not isinstance(state, dict):
+            return
+
+        task_id = self._extract_task_id_from_state(state)
+        if not task_id:
+            return
+
+        category = str(state.get('category', '')).strip().lower()
+        if category != 'clean':
+            return
+
+        zone = self._extract_clean_zone_from_state(state)
+        context = {'zone': zone, 'task_id': task_id, 'updated_at': time.time()}
+        self._clean_task_context_by_id[task_id] = context
 
     def _fleet_states_callback(self, msg: FleetState):
         for robot in msg.robots:
@@ -239,12 +277,17 @@ class IncidentTaskDispatcher(Node):
 
         robot_name = str(payload.get('robot_name', '')).strip()
         now = time.time()
+        teleop_enabled = self._set_cleaner_teleop(robot_name, True)
         if not self._send_cleaner_to_puddle(robot_name, level_name, x, y):
             self.get_logger().warn(
                 f'Cleaner navigate command failed for {robot_name}; '
                 f'falling back to timed local workflow for {obstacle_name}')
+            if teleop_enabled:
+                self._set_cleaner_teleop(robot_name, False)
+                teleop_enabled = False
 
         had_active_clean_task = self._robot_key(robot_name) in self._active_clean_task_robot_keys
+        resume_zone = self._resolve_resume_zone(robot_name)
         self._active_cleaning_work[key] = {
             'obstacle_type': obstacle_type,
             'obstacle_name': obstacle_name,
@@ -256,6 +299,8 @@ class IncidentTaskDispatcher(Node):
             'navigate_deadline': now + max(5.0, self.args.navigate_timeout_sec),
             'dwell_until': 0.0,
             'had_active_clean_task': had_active_clean_task,
+            'resume_zone': resume_zone,
+            'teleop_enabled': teleop_enabled,
             'phase': 'navigating',
         }
 
@@ -326,11 +371,14 @@ class IncidentTaskDispatcher(Node):
                 action='Work Order: Cleaned')
             self._deactivate_entity(state)
 
+            if bool(state.get('teleop_enabled', False)):
+                self._set_cleaner_teleop(str(state['robot_name']), False)
+
             if self.args.remove_entity_on_clean:
                 self._remove_entity_from_sim(str(state['obstacle_name']))
 
             if self.args.resume_clean_after_local_response and bool(state.get('had_active_clean_task', False)):
-                zone = self._level_zone_map.get(str(state['level_name']), self.args.clean_zone)
+                zone = self._choose_resume_zone(state)
                 self._dispatch_resume_clean_task(zone, state)
 
     def _robot_key(self, robot_name: str) -> str:
@@ -387,6 +435,24 @@ class IncidentTaskDispatcher(Node):
                 f'Navigate accepted for {robot_name} -> ({x:.3f}, {y:.3f}) on {level_name}')
         return ok
 
+    def _set_cleaner_teleop(self, robot_name: str, enabled: bool) -> bool:
+        if not robot_name:
+            return False
+
+        path = (
+            '/open-rmf/rmf_demos_fm/toggle_action?'
+            f'robot_name={urllib.parse.quote(robot_name)}'
+        )
+        ok = self._fleet_post(path, {'toggle': bool(enabled)})
+        if not ok:
+            self.get_logger().warn(
+                f'Failed to set teleop={enabled} for {robot_name}; '
+                'direct puddle diversion may conflict with RMF task tracking')
+            return False
+
+        self.get_logger().info(f'Set cleaner teleop={enabled} for {robot_name}')
+        return True
+
     def _fleet_post(self, path: str, body: dict) -> bool:
         url = self.args.cleaner_fleet_manager_prefix.rstrip('/') + path
         data = json.dumps(body).encode('utf-8')
@@ -425,6 +491,58 @@ class IncidentTaskDispatcher(Node):
         self._task_pub.publish(msg)
         self.get_logger().info(
             f"Submitted best-effort resume clean task after puddle {state['obstacle_name']} in zone={zone}")
+
+    def _resolve_resume_zone(self, robot_name: str) -> str:
+        robot_key = self._robot_key(robot_name)
+        context = self._active_clean_task_context_by_robot.get(robot_key)
+        if not isinstance(context, dict):
+            return ''
+        return str(context.get('zone', '')).strip()
+
+    def _choose_resume_zone(self, state: dict) -> str:
+        strict_zone = str(state.get('resume_zone', '')).strip()
+        if self.args.strict_resume_mode and strict_zone:
+            return strict_zone
+        level_name = str(state.get('level_name', '')).strip()
+        if level_name and level_name in self._level_zone_map:
+            return self._level_zone_map[level_name]
+        return self.args.clean_zone
+
+    def _extract_task_id_from_state(self, state: dict) -> str:
+        booking = state.get('booking', {})
+        if isinstance(booking, dict):
+            booking_id = str(booking.get('id', '')).strip()
+            if booking_id:
+                return booking_id
+        return str(state.get('task_id', '')).strip()
+
+    def _extract_clean_zone_from_state(self, state: dict) -> str:
+        # Prefer explicit task-level description first.
+        description = state.get('description', {})
+        if isinstance(description, dict):
+            zone = str(description.get('zone', '')).strip()
+            if zone:
+                return zone
+
+        # Fall back to phase details where clean tasks usually expose zone metadata.
+        phases = state.get('phases', {})
+        if isinstance(phases, dict):
+            for phase in phases.values():
+                if not isinstance(phase, dict):
+                    continue
+                detail = phase.get('detail', {})
+                if isinstance(detail, dict):
+                    zone = str(detail.get('zone', '')).strip()
+                    if zone:
+                        return zone
+                    if 'cleaning_zone' in detail:
+                        zone = str(detail.get('cleaning_zone', '')).strip()
+                        if zone:
+                            return zone
+                if isinstance(detail, str) and detail.strip():
+                    return detail.strip()
+
+        return ''
 
     def _publish_status_alert(self, *, robot_name: str, level_name: str,
                               obstacle_type: str, obstacle_name: str,

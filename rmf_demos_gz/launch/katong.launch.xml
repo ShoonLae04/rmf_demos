@@ -7,17 +7,17 @@
   <arg name="bidding_time_window" default="2.0"/>
   <arg name="use_rmf_panel" default="false"/>
   <arg name="dashboard_config_file" default=""/>
-  <arg name="trigger_on_any_nearby" default="false"/>
+  <arg name="trigger_on_any_nearby" default="true"/>
   <arg name="use_cleaner_fleet" default="true"/>
   <arg name="use_mock_docker" default="true"/>
-  <arg name="use_scan_obstacle_detector" default="true"/>
+  <arg name="use_scan_obstacle_detector" default="false"/>
   <arg name="scan_topic" default="/tinyrobot_scan"/>
   <arg name="scan_min_consecutive_hits" default="2"/>
   <arg name="scan_auto_discover" default="true"/>
   <arg name="scan_topic_regex" default="^(?!/scan$).*scan$"/>
   <arg name="scan_require_motion" default="true"/>
   <arg name="scan_motion_velocity_threshold" default="0.05"/>
-  <arg name="use_test_obstacle_classifier" default="true"/>
+  <arg name="use_test_obstacle_classifier" default="false"/>
   <arg name="test_classifier_mode" default="perception_first"/>
   <arg name="test_classifier_task_aware_clean_type" default="puddle"/>
   <arg name="test_classifier_task_aware_idle_type" default="unknown_obstacle"/>
@@ -31,6 +31,7 @@
   <arg name="incident_min_confidence" default="0.6"/>
   <arg name="incident_resume_clean_after_local_response" default="true"/>
   <arg name="incident_remove_entity_on_clean" default="true"/>
+  <arg name="incident_strict_resume_mode" default="true"/>
   <arg name="viz_initial_map" default="L1"/>
   <let name="simulation_map_name" value="$(var map_name)"/>
 
@@ -74,6 +75,13 @@
     <param name="use_sim_time" value="$(var use_sim_time)"/>
   </node>
 
+  <include file="$(find-pkg-share rmf_demos_gz)/simulation.launch.xml">
+    <arg name="map_name" value="$(var simulation_map_name)" />
+    <arg name="headless" value="$(var headless)" />
+    <arg name="software_rendering" value="$(var software_rendering)" />
+    <arg name="use_sim_time" value="$(var use_sim_time)" />
+  </include>
+
   <include file="$(find-pkg-share rmf_visualization)/visualization.launch.xml">
     <arg name="use_sim_time" value="$(var use_sim_time)"/>
     <arg name="map_name" value="$(var viz_initial_map)"/>
@@ -85,13 +93,6 @@
         args="0 0 0 0 0 0 map world">
     <param name="use_sim_time" value="true"/>
   </node>
-
-  <include file="$(find-pkg-share rmf_demos_gz)/simulation.launch.xml">
-    <arg name="map_name" value="$(var simulation_map_name)" />
-    <arg name="headless" value="$(var headless)" />
-    <arg name="software_rendering" value="$(var software_rendering)" />
-    <arg name="use_sim_time" value="$(var use_sim_time)" />
-  </include>
 
   <!-- Publish dock_summary early so cleaning zones are available before task submission -->
   <group if="$(var use_mock_docker)">
@@ -150,10 +151,12 @@
       <let name="incident_resume_flag" if="$(var incident_resume_clean_after_local_response)" value="--resume-clean-after-local-response"/>
       <let name="incident_remove_flag" value=""/>
       <let name="incident_remove_flag" if="$(var incident_remove_entity_on_clean)" value="--remove-entity-on-clean"/>
+          <let name="incident_strict_resume_flag" value=""/>
+          <let name="incident_strict_resume_flag" if="$(var incident_strict_resume_mode)" value="--strict-resume-mode"/>
     <node pkg="rmf_demos_bridges"
           exec="incident_task_dispatcher"
           output="screen"
-        args="--clean-zone $(var incident_clean_zone) --enabled-obstacle-types $(var incident_enabled_obstacle_types) --cooldown-sec $(var incident_dispatch_cooldown_sec) --min-confidence $(var incident_min_confidence) $(var incident_allow_active_flag) $(var incident_resume_flag) $(var incident_remove_flag)"/>
+            args="--clean-zone $(var incident_clean_zone) --enabled-obstacle-types $(var incident_enabled_obstacle_types) --cooldown-sec $(var incident_dispatch_cooldown_sec) --min-confidence $(var incident_min_confidence) $(var incident_allow_active_flag) $(var incident_resume_flag) $(var incident_remove_flag) $(var incident_strict_resume_flag)"/>
   </group>
 
 </launch>

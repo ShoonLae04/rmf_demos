@@ -29,9 +29,9 @@ rmf_fleet:
   tool_system:
     power: 0.0 # W
   recharge_threshold: 0.20 # Battery level below which robots in this fleet will not operate
-  recharge_soc: 1.0 # Battery level to which robots in this fleet should be charged up to during recharging tasks
+  recharge_soc: 0.95 # Allow follow-up tasks without blocking on full 100% charge
+  account_for_battery_drain: False # DISABLED for faster testing: skip battery depletion simulation
   publish_fleet_state: 10.0 # Publish frequency for fleet state, ensure that it is same as robot_state_update_frequency
-  account_for_battery_drain: True
   lane_merge_distance: 0.08
   task_capabilities: # Specify the types of RMF Tasks that robots in this fleet are capable of performing
     loop: True
@@ -47,7 +47,7 @@ robots:
   # Configuration for cleanerBotA_1
   cleanerBotA_1:
     robot_config:
-      max_delay: 15.0 # allowed seconds of delay of the current itinerary before it gets interrupted and replanned
+      max_delay: 2.0 # REDUCED from 15s: speeds up replanning, less idle-waiting time
       filter_waypoints: False
     rmf_config:
       robot_state_update_frequency: 10.0
