@@ -25,7 +25,7 @@
   <arg name="test_classifier_ground_truth_topic" default="/obstacle_ground_truth"/>
   <arg name="use_incident_task_dispatcher" default="true"/>
   <arg name="incident_clean_zone" default="clean_inno_room"/>
-  <arg name="incident_enabled_obstacle_types" default="puddle,water_puddle"/>
+  <arg name="incident_enabled_obstacle_types" default="puddle,water_puddle,spill,spills,stain,stains,litter,leaf,leaves,hair"/>
   <arg name="incident_dispatch_cooldown_sec" default="180.0"/>
   <arg name="incident_allow_while_clean_active" default="false"/>
   <arg name="incident_min_confidence" default="0.6"/>

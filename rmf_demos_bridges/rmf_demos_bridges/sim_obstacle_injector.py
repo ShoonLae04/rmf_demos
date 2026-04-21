@@ -18,6 +18,30 @@ PRESET_MODELS = {
         'classification': 'water_puddle',
         'model_relpath': Path('models/water_puddle/model.sdf'),
     },
+    'puddle': {
+        'classification': 'puddle',
+        'model_relpath': Path('models/water_puddle/model.sdf'),
+    },
+    'spill': {
+        'classification': 'spill',
+        'model_relpath': Path('models/water_puddle/model.sdf'),
+    },
+    'stain': {
+        'classification': 'stain',
+        'model_relpath': Path('models/water_puddle/model.sdf'),
+    },
+    'litter': {
+        'classification': 'litter',
+        'model_relpath': Path('models/barrel/model.sdf'),
+    },
+    'leaf': {
+        'classification': 'leaf',
+        'model_relpath': Path('models/barrel/model.sdf'),
+    },
+    'hair': {
+        'classification': 'hair',
+        'model_relpath': Path('models/barrel/model.sdf'),
+    },
     'barrel': {
         'classification': 'barrel',
         'model_relpath': Path('models/barrel/model.sdf'),

@@ -32,7 +32,7 @@ class IncidentTaskDispatcher(Node):
                             help='Dispatch states topic to detect active clean tasks')
         parser.add_argument('--task-api-topic', default='/task_api_requests',
                             help='Task API request topic')
-        parser.add_argument('--enabled-obstacle-types', default='puddle,water_puddle',
+        parser.add_argument('--enabled-obstacle-types', default='puddle,water_puddle,spill,spills,stain,stains,litter,leaf,leaves,hair',
                             help='Comma-separated obstacle types that should create clean tasks')
         parser.add_argument('--clean-zone', default='clean_inno_room',
                             help='Fallback clean zone when no per-level mapping is available')
@@ -241,7 +241,7 @@ class IncidentTaskDispatcher(Node):
 
         zone = self._zone_for_payload(payload)
         request_id = f'auto_clean_{uuid.uuid4()}'
-        task_payload = self._build_clean_task_payload(zone)
+        task_payload = self._build_clean_task_payload(zone, obstacle_type)
 
         msg = ApiRequest()
         msg.request_id = request_id
@@ -288,8 +288,10 @@ class IncidentTaskDispatcher(Node):
 
         had_active_clean_task = self._robot_key(robot_name) in self._active_clean_task_robot_keys
         resume_zone = self._resolve_resume_zone(robot_name)
+        cleaning_action = self._cleaning_action_for_obstacle(obstacle_type)
         self._active_cleaning_work[key] = {
             'obstacle_type': obstacle_type,
+            'cleaning_action': cleaning_action,
             'obstacle_name': obstacle_name,
             'level_name': level_name,
             'x': x,
@@ -311,7 +313,7 @@ class IncidentTaskDispatcher(Node):
             obstacle_name=obstacle_name,
             x=x,
             y=y,
-            action='Work Order: Diverting cleaner to puddle')
+            action=self._recommended_cleaning_action(obstacle_type, phase='dispatch'))
 
         self.get_logger().info(
             f'Cleaner workflow started for {obstacle_type} {obstacle_name} at '
@@ -350,7 +352,9 @@ class IncidentTaskDispatcher(Node):
                     obstacle_name=str(state['obstacle_name']),
                     x=float(state['x']),
                     y=float(state['y']),
-                    action='Work Order: Cleaning in progress')
+                    action=self._recommended_cleaning_action(
+                        str(state['obstacle_type']),
+                        phase='in_progress'))
                 continue
 
             if phase == 'dwell' and now >= float(state.get('dwell_until', 0.0)):
@@ -368,7 +372,9 @@ class IncidentTaskDispatcher(Node):
                 obstacle_name=str(state['obstacle_name']),
                 x=float(state['x']),
                 y=float(state['y']),
-                action='Work Order: Cleaned')
+                action=self._recommended_cleaning_action(
+                    str(state['obstacle_type']),
+                    phase='completed'))
             self._deactivate_entity(state)
 
             if bool(state.get('teleop_enabled', False)):
@@ -484,7 +490,7 @@ class IncidentTaskDispatcher(Node):
 
     def _dispatch_resume_clean_task(self, zone: str, state: dict):
         request_id = f'resume_clean_{uuid.uuid4()}'
-        task_payload = self._build_clean_task_payload(zone)
+        task_payload = self._build_clean_task_payload(zone, str(state.get('obstacle_type', '')))
         msg = ApiRequest()
         msg.request_id = request_id
         msg.json_msg = json.dumps(task_payload)
@@ -633,9 +639,33 @@ class IncidentTaskDispatcher(Node):
             return self._level_zone_map[level_name]
         return self.args.clean_zone
 
-    def _build_clean_task_payload(self, zone: str) -> dict:
+    def _cleaning_action_for_obstacle(self, obstacle_type: str) -> str:
+        otype = str(obstacle_type).strip().lower()
+        if otype in {'puddle', 'water_puddle'}:
+            return 'mopping'
+        if otype in {'spill', 'spills', 'stain', 'stains'}:
+            return 'scrubbing'
+        if otype in {'litter'}:
+            return 'vacuuming'
+        if otype in {'leaf', 'leaves', 'hair'}:
+            return 'sweeping_or_vacuuming'
+        return 'cleaning'
+
+    def _recommended_cleaning_action(self, obstacle_type: str, phase: str) -> str:
+        action = self._cleaning_action_for_obstacle(obstacle_type)
+        label = action.replace('_', ' ')
+        if phase == 'dispatch':
+            return f'Work Order: {label.capitalize()} required'
+        if phase == 'in_progress':
+            return f'Work Order: {label.capitalize()} in progress'
+        if phase == 'completed':
+            return f'Work Order: {label.capitalize()} completed'
+        return f'Work Order: {label.capitalize()}'
+
+    def _build_clean_task_payload(self, zone: str, obstacle_type: str = '') -> dict:
         now = self.get_clock().now().to_msg()
         earliest_start_ms = now.sec * 1000 + round(now.nanosec / 10**6)
+        cleaning_action = self._cleaning_action_for_obstacle(obstacle_type)
         return {
             'type': 'dispatch_task_request',
             'request': {
@@ -643,6 +673,8 @@ class IncidentTaskDispatcher(Node):
                 'category': 'clean',
                 'description': {
                     'zone': zone,
+                    'obstacle_type': str(obstacle_type).strip().lower(),
+                    'cleaning_action': cleaning_action,
                 },
             },
         }

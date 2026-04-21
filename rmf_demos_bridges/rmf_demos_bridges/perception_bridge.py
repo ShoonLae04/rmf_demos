@@ -228,8 +228,14 @@ class PerceptionBridge(Node):
         self._alert_pub.publish(String(data=json.dumps(payload)))
 
     def _recommended_action(self, alert_type: str):
-        if alert_type == 'water_puddle':
+        if alert_type in ('water_puddle', 'puddle'):
             return 'Work Order: Mop required'
+        if alert_type in ('spill', 'spills', 'stain', 'stains'):
+            return 'Work Order: Scrub required'
+        if alert_type == 'litter':
+            return 'Work Order: Vacuum required'
+        if alert_type in ('leaf', 'leaves', 'hair'):
+            return 'Work Order: Sweep or vacuum required'
         if alert_type == 'intruder':
             return 'Security Alert: investigate immediately'
         if alert_type == 'barrel':
