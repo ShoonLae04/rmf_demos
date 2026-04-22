@@ -1,0 +1,105 @@
+<?xml version='1.0' ?>
+<launch>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="software_rendering" default="false"/>
+  <arg name="map_name" default="katong_office"/>
+  <arg name="trigger_on_any_nearby" default="false"/>
+  <arg name="use_cleaner_fleet" default="true"/>
+  <arg name="use_mock_docker" default="true"/>
+  <arg name="use_scan_obstacle_detector" default="false"/>
+  <arg name="scan_topic" default="/scan"/>
+  <arg name="scan_min_consecutive_hits" default="2"/>
+  <arg name="scan_auto_discover" default="true"/>
+  <arg name="scan_topic_regex" default=".*scan$"/>
+  <arg name="scan_require_motion" default="false"/>
+  <arg name="scan_motion_velocity_threshold" default="0.05"/>
+  <arg name="use_test_obstacle_classifier" default="false"/>
+  <arg name="test_classifier_mode" default="task_aware"/>
+  <arg name="test_classifier_fixed_type" default="intruder"/>
+  <arg name="test_classifier_ground_truth_topic" default="/obstacle_ground_truth"/>
+  <arg name="server_uri" default="ws://localhost:8000/_internal"/>
+  <arg name="bidding_time_window" default="2.0"/>
+
+  <arg name="building_file" default="/home/shoonlaezayyar/rmf_ws/install/rmf_demos_maps/share/rmf_demos_maps/katong_office/katong_office.building.yaml"/>
+  <arg name="nav_graph_dir" default="/home/shoonlaezayyar/rmf_ws/install/rmf_demos_maps/share/rmf_demos_maps/maps/katong_office/nav_graphs"/>
+  <arg name="viz_config_file" default="$(find-pkg-share rmf_demos_maps)/maps/katong_office/katong_office.rviz"/>
+
+  <node pkg="rmf_building_map_tools" exec="building_map_server" args="$(var building_file)">
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+  </node>
+
+  <node pkg="rviz2" exec="rviz2" args="-d $(var viz_config_file)">
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+  </node>
+  
+  <node pkg="tf2_ros" exec="static_transform_publisher" name="map_to_world" 
+        args="0 0 0 0 0 0 map world">
+    <param name="use_sim_time" value="true"/>
+  </node>
+
+  <node pkg="rmf_traffic_ros2" exec="rmf_traffic_schedule" name="rmf_traffic_schedule_primary" output="both">
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+  </node>
+
+  <node pkg="rmf_traffic_ros2" exec="rmf_traffic_blockade" output="both">
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+  </node>
+
+  <node pkg="rmf_fleet_adapter" exec="door_supervisor">
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+  </node>
+
+  <node pkg="rmf_fleet_adapter" exec="lift_supervisor">
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+  </node>
+
+  <node pkg="rmf_task_ros2" exec="rmf_task_dispatcher" output="screen">
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+    <param name="bidding_time_window" value="$(var bidding_time_window)"/>
+  </node>
+
+  <include file="$(find-pkg-share rmf_demos_gz)/simulation.launch.xml">
+    <arg name="map_name" value="$(var map_name)" />
+    <arg name="headless" value="$(var headless)" />
+    <arg name="software_rendering" value="$(var software_rendering)" />
+    <arg name="use_sim_time" value="$(var use_sim_time)" />
+  </include>
+
+
+  
+  <include file="$(find-pkg-share rmf_demos_fleet_adapter)/launch/fleet_adapter.launch.xml">
+    <arg name="fleet_name" value="TinyRobot"/>
+    <arg name="use_sim_time" value="$(var use_sim_time)"/>
+    <arg name="nav_graph_file" value="$(var nav_graph_dir)/0.yaml"/>
+    <arg name="config_file" value="$(find-pkg-share rmf_demos)/config/katong_office/tinyRobot_katong_config.yaml"/>
+    <arg name="server_uri" value="$(var server_uri)"/>
+  </include>
+  
+  <include file="$(find-pkg-share rmf_demos_fleet_adapter)/launch/fleet_adapter.launch.xml">
+
+    <arg name="fleet_name" value="DeliveryRobot"/>
+
+    <arg name="use_sim_time" value="$(var use_sim_time)"/>
+
+    <arg name="nav_graph_file" value="$(var nav_graph_dir)/2.yaml"/>
+
+    <arg name="config_file" value="$(find-pkg-share rmf_demos)/config/katong_office/DeliveryRobot_config.yaml"/>
+
+    <arg name="server_uri" value="$(var server_uri)"/>
+
+  </include>
+  
+  <group if="$(var use_cleaner_fleet)">
+    <include file="$(find-pkg-share rmf_demos_fleet_adapter)/launch/fleet_adapter.launch.xml">
+      <arg name="fleet_name" value="CleanerBotA"/>
+      <arg name="use_sim_time" value="$(var use_sim_time)"/>
+      <arg name="nav_graph_file" value="$(var nav_graph_dir)/1.yaml"/>
+      <arg name="config_file" value="$(find-pkg-share rmf_demos)/config/katong_office/cleanerBotA_config.yaml"/>
+      <arg name="server_uri" value="$(var server_uri)"/>
+    </include>
+  </group>
+  
+  
+
+</launch>

@@ -1,0 +1,83 @@
+building_name: katong_office
+levels:
+  L1:
+    lanes:
+    - - 0
+      - 1
+      - {speed_limit: 0}
+    - - 1
+      - 0
+      - {speed_limit: 0}
+    - - 1
+      - 2
+      - {speed_limit: 0}
+    - - 2
+      - 1
+      - {speed_limit: 0}
+    - - 2
+      - 3
+      - {speed_limit: 0}
+    - - 3
+      - 2
+      - {speed_limit: 0}
+    - - 3
+      - 4
+      - {speed_limit: 0}
+    - - 4
+      - 3
+      - {speed_limit: 0}
+    - - 4
+      - 5
+      - {speed_limit: 0}
+    - - 5
+      - 4
+      - {speed_limit: 0}
+    - - 0
+      - 6
+      - {speed_limit: 0}
+    - - 6
+      - 0
+      - {speed_limit: 0}
+    - - 3
+      - 7
+      - {speed_limit: 0}
+    - - 7
+      - 3
+      - {speed_limit: 0}
+    - - 7
+      - 8
+      - {speed_limit: 0}
+    - - 8
+      - 7
+      - {speed_limit: 0}
+    vertices:
+    - - 89.89075867282166
+      - -25.428554030120743
+      - {name: ''}
+    - - 89.91025766467499
+      - -32.677710480590974
+      - {is_holding_point: false, is_passthrough_point: false, name: ''}
+    - - 69.37798173472335
+      - -32.614744986064615
+      - {name: ''}
+    - - 69.36035139625596
+      - -36.38511879830302
+      - {name: ''}
+    - - 65.68625385629335
+      - -36.38511879830302
+      - {dropoff_ingestor: coke_ingestor, is_holding_point: true, is_parking_spot: false,
+        name: desk_person_b}
+    - - 63.27601597162369
+      - -36.354407886134034
+      - {dropoff_ingestor: coke_ingestor, is_holding_point: true, is_parking_spot: false,
+        name: desk_person_b}
+    - - 87.23337106641111
+      - -25.353564157284836
+      - {is_holding_point: true, is_parking_spot: false, name: reception_desk, pickup_dispenser: coke_dispenser}
+    - - 70.87916037003114
+      - -38.5903735311146
+      - {name: ''}
+    - - 70.9786052284831
+      - -41.47338072242798
+      - {is_charger: true, is_holding_point: true, is_parking_spot: true, name: DeliveryRobot_charger,
+        spawn_robot_name: DeliveryRobot1, spawn_robot_type: DeliveryRobot}

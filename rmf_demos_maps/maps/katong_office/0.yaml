@@ -1,0 +1,198 @@
+building_name: katong_office
+levels:
+  L1:
+    lanes:
+    - - 0
+      - 1
+      - {speed_limit: 0}
+    - - 1
+      - 0
+      - {speed_limit: 0}
+    - - 1
+      - 2
+      - {speed_limit: 0}
+    - - 2
+      - 1
+      - {speed_limit: 0}
+    - - 2
+      - 3
+      - {speed_limit: 0}
+    - - 3
+      - 2
+      - {speed_limit: 0}
+    - - 3
+      - 4
+      - {door_name: meeting_room1_door, speed_limit: 0}
+    - - 4
+      - 3
+      - {door_name: meeting_room1_door, speed_limit: 0}
+    - - 3
+      - 5
+      - {speed_limit: 0}
+    - - 5
+      - 3
+      - {speed_limit: 0}
+    - - 5
+      - 6
+      - {door_name: meeting_room2_door, speed_limit: 0}
+    - - 6
+      - 5
+      - {door_name: meeting_room2_door, speed_limit: 0}
+    - - 5
+      - 7
+      - {speed_limit: 0}
+    - - 7
+      - 5
+      - {speed_limit: 0}
+    - - 7
+      - 8
+      - {speed_limit: 0}
+    - - 8
+      - 7
+      - {speed_limit: 0}
+    - - 8
+      - 9
+      - {door_name: meeting_room3_door, speed_limit: 0}
+    - - 9
+      - 8
+      - {door_name: meeting_room3_door, speed_limit: 0}
+    - - 7
+      - 10
+      - {speed_limit: 0}
+    - - 10
+      - 7
+      - {speed_limit: 0}
+    - - 7
+      - 11
+      - {speed_limit: 0}
+    - - 11
+      - 7
+      - {speed_limit: 0}
+    - - 11
+      - 12
+      - {door_name: meeting_room5_door, speed_limit: 0}
+    - - 12
+      - 11
+      - {door_name: meeting_room5_door, speed_limit: 0}
+    - - 11
+      - 13
+      - {door_name: meeting_room4_door, speed_limit: 0}
+    - - 13
+      - 11
+      - {door_name: meeting_room4_door, speed_limit: 0}
+    - - 3
+      - 14
+      - {speed_limit: 0}
+    - - 14
+      - 3
+      - {speed_limit: 0}
+    - - 14
+      - 15
+      - {door_name: conference_room_door, speed_limit: 0}
+    - - 15
+      - 14
+      - {door_name: conference_room_door, speed_limit: 0}
+    - - 2
+      - 16
+      - {speed_limit: 0}
+    - - 16
+      - 2
+      - {speed_limit: 0}
+    - - 16
+      - 17
+      - {speed_limit: 0}
+    - - 17
+      - 16
+      - {speed_limit: 0}
+    - - 17
+      - 18
+      - {speed_limit: 0}
+    - - 18
+      - 17
+      - {speed_limit: 0}
+    - - 18
+      - 19
+      - {speed_limit: 0}
+    - - 19
+      - 18
+      - {speed_limit: 0}
+    - - 19
+      - 20
+      - {speed_limit: 0}
+    - - 20
+      - 19
+      - {speed_limit: 0}
+    - - 20
+      - 21
+      - {dock_name: clean_inno_room, speed_limit: 0}
+    - - 21
+      - 20
+      - {speed_limit: 0, undock_name: clean_inno_room}
+    vertices:
+    - - 93.26172813526448
+      - -32.672267012031924
+      - {is_charger: true, is_holding_point: false, is_parking_spot: true, name: tinyRobot1_charger,
+        spawn_robot_name: TinyRobot1, spawn_robot_type: TinyRobot}
+    - - 89.91025766467499
+      - -32.677710480590974
+      - {is_holding_point: false, is_passthrough_point: false, name: ''}
+    - - 87.95751487636394
+      - -32.720283279470735
+      - {name: ''}
+    - - 87.97278908664906
+      - -35.606946531756606
+      - {name: ''}
+    - - 92.41539064303082
+      - -35.6405010469042
+      - {name: meeting_room1}
+    - - 88.60455642269676
+      - -41.47281200183226
+      - {name: ''}
+    - - 92.35567498048
+      - -41.46915594085976
+      - {name: meeting_room2}
+    - - 88.60512514329247
+      - -45.84375476315305
+      - {name: ''}
+    - - 89.44845654094875
+      - -46.16337573794878
+      - {name: ''}
+    - - 93.70793006550804
+      - -46.06588077868217
+      - {name: meeting_room3}
+    - - 84.82053331616103
+      - -45.82555570408994
+      - {name: pantry}
+    - - 88.80238994420861
+      - -49.41320771350283
+      - {name: ''}
+    - - 84.72571946827425
+      - -49.4702422646738
+      - {name: meeting_room5}
+    - - 88.6983140751915
+      - -52.8289436114089
+      - {name: meeting_room4}
+    - - 83.2437960874216
+      - -36.60228882006942
+      - {name: ''}
+    - - 79.59325982928173
+      - -36.60228882006942
+      - {name: conference_room}
+    - - 85.58351261822173
+      - -32.73970102552467
+      - {name: ''}
+    - - 81.79770210409944
+      - -32.786498605972646
+      - {name: ''}
+    - - 69.37798173472335
+      - -32.614744986064615
+      - {name: ''}
+    - - 69.49075090427507
+      - -29.073159344905207
+      - {name: ''}
+    - - 74.39791594156229
+      - -28.90831161794523
+      - {name: inno_room}
+    - - 82.05322014317737
+      - -23.972710550871927
+      - {dock_name: clean_inno_room, is_cleaning_zone: true, name: clean_inno_room}
