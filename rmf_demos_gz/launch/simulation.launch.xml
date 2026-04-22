@@ -6,6 +6,7 @@
   <arg name="use_crowdsim" default='0'/>
   <arg name="use_tpe" default='0'/>
   <arg name="ignition_version" default='6'/>
+  <arg name="software_rendering" default='false'/>
 
   <let name="world_path" value="$(find-pkg-share $(var map_package))/maps/$(var map_name)_ign/$(var map_name).world" />
   <let name="model_path" value="$(find-pkg-share $(var map_package))/maps/$(var map_name)/models:$(find-pkg-share $(var map_package))/maps/$(var map_name)_ign/models:$(find-pkg-share rmf_demos_assets)/models:$(env HOME)/.gazebo/models" />
@@ -22,12 +23,19 @@
   <let name="ign_headless" if="$(var headless)" value="-s"/>
   <let name="ign_headless" unless="$(var headless)" value="" />
 
+  <let name="libgl_software" value=""/>
+  <let name="libgl_software" if="$(var software_rendering)" value="1"/>
+  <let name="mesa_driver" value=""/>
+  <let name="mesa_driver" if="$(var software_rendering)" value="llvmpipe"/>
+
   <group unless="$(var use_tpe)">
     <executable cmd="ign gazebo --force-version $(var ignition_version) $(var ign_headless) $(var tpe_engine) -r -v 4 $(var world_path)" output="both">
       <env name="IGN_GAZEBO_RESOURCE_PATH" value="$(var model_path):$(var world_path)" />
       <env name="IGN_GAZEBO_SYSTEM_PLUGIN_PATH" value="$(var plugin_path)"/>
       <env name="IGN_GUI_PLUGIN_PATH" value="$(var plugin_path)"/>
       <env name="MENGE_RESOURCE_PATH" value="$(var menge_resource_path)"/>
+      <env name="LIBGL_ALWAYS_SOFTWARE" value="$(var libgl_software)"/>
+      <env name="MESA_LOADER_DRIVER_OVERRIDE" value="$(var mesa_driver)"/>
     </executable>
   </group>
 
@@ -37,12 +45,36 @@
       <env name="IGN_GAZEBO_SYSTEM_PLUGIN_PATH" value="$(var plugin_path)"/>
       <env name="IGN_GUI_PLUGIN_PATH" value="$(var plugin_path)"/>
       <env name="MENGE_RESOURCE_PATH" value="$(var menge_resource_path)"/>
+      <env name="LIBGL_ALWAYS_SOFTWARE" value="$(var libgl_software)"/>
+      <env name="MESA_LOADER_DRIVER_OVERRIDE" value="$(var mesa_driver)"/>
     </executable>
   </group>
 
   <!-- ros_ign bridge for simulation clock -->
   <node pkg="ros_ign_bridge" exec="parameter_bridge"
     args="/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock"
+    />
+
+  <!-- Bridge TinyRobot laser scan into ROS -->
+  <node pkg="ros_ign_bridge" exec="parameter_bridge"
+    args="/scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan"
+    />
+
+  <node pkg="ros_ign_bridge" exec="parameter_bridge"
+    args="/tinyrobot_scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan"
+    />
+
+  <node pkg="ros_ign_bridge" exec="parameter_bridge"
+    args="/cleanerbota_scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan"
+    />
+
+  <!-- Bridge scoped laser topics so each robot has its own scan stream -->
+  <node pkg="ros_ign_bridge" exec="parameter_bridge"
+    args="/model/TinyRobot1/link/base_footprint/sensor/front_laser/scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan"
+    />
+
+  <node pkg="ros_ign_bridge" exec="parameter_bridge"
+    args="/model/cleanerBotA_1/link/base_footprint/sensor/front_laser/scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan"
     />
 
 </launch>

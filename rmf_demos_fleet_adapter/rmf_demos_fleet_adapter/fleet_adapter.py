@@ -95,6 +95,17 @@ def initialize_fleet(config_yaml, nav_graph_path, node, use_sim_time):
         raise RuntimeError(
             "Unable to initialize fleet adapter. Please ensure RMF Schedule "
             "Node is running and that traffic schedule discovery succeeds.")
+    adapter = None
+    while adapter is None:
+        try:
+            adapter = adpt.Adapter.make(f'{fleet_name}_fleet_adapter')
+        except Exception as exc:
+            node.get_logger().warn(
+                f"Unable to initialize fleet adapter yet for [{fleet_name}]: {exc}. "
+                "Waiting for RMF Schedule Node...")
+            time.sleep(1.0)
+            continue
+
     if use_sim_time:
         adapter.node.use_sim_time()
     adapter.start()

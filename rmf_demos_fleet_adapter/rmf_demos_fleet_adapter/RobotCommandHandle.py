@@ -265,7 +265,14 @@ class RobotCommandHandle(adpt.RobotCommandHandle):
 
             self.node.get_logger().info(f"Received new path for {self.name}")
 
-            self.remaining_waypoints = self.filter_waypoints(waypoints)
+            # Preserve all planned waypoints when configured, which helps
+            # avoid cutting corners across room boundaries.
+            if self.config.get('filter_waypoints', True):
+                self.remaining_waypoints = self.filter_waypoints(waypoints)
+            else:
+                self.remaining_waypoints = [
+                    PlanWaypoint(i, wp) for i, wp in enumerate(waypoints)
+                ]
             assert next_arrival_estimator is not None
             assert path_finished_callback is not None
 

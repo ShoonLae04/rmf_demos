@@ -29,6 +29,7 @@ from pyproj import Transformer
 
 from rclpy.node import Node
 from flask_socketio import SocketIO, emit, disconnect
+from std_msgs.msg import String
 
 from rclpy.qos import QoSProfile
 from rclpy.qos import QoSHistoryPolicy as History
@@ -75,6 +76,11 @@ class FleetSocketIOBridge(Node):
                             required=False,
                             type=str,
                             help='SocketIO topic to publish GPS.')
+        parser.add_argument('-a', '--alert_topic',
+                    required=False,
+                    type=str,
+                    default='/rmf_demo_alerts',
+                    help='SocketIO topic to publish alerts.')
         parser.add_argument('-x', '--offset_x',
                             required=False,
                             type=float,
@@ -122,6 +128,14 @@ class FleetSocketIOBridge(Node):
         except Exception as e:
             print(e)
 
+    def alert_callback(self, msg: String):
+        try:
+            payload = json.loads(msg.data) if msg.data else {}
+        except Exception:
+            payload = {'message': msg.data}
+
+        self._sio.emit(self.args.alert_topic, payload)
+
     def start_socketio(self):
         self._app.run(self.args.listening_interfaces, self.args.listening_port)
 
@@ -149,6 +163,12 @@ class FleetSocketIOBridge(Node):
             RobotState,
             self.args.robot_state_topic,
             self.robot_state_callback,
+            10)
+
+        self.alert_sub = self.create_subscription(
+            String,
+            self.args.alert_topic,
+            self.alert_callback,
             10)
 
     def _init_gps_conversion_tools(self, frame: str):

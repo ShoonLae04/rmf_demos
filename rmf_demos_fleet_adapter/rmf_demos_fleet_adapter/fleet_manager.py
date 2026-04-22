@@ -328,7 +328,15 @@ class FleetManager(Node):
             if (robot_name not in self.robots):
                 return response
             # Toggle action mode
-            self.robots[robot_name].mode_teleop = mode.toggle
+            robot = self.robots[robot_name]
+            robot.mode_teleop = mode.toggle
+
+            # When leaving teleop override, clear any stale request that was
+            # injected through the fleet manager API. Otherwise future RMF
+            # task IDs can be treated as unexpected and get overridden.
+            if not mode.toggle:
+                robot.last_path_request = None
+                robot.destination = None
             response['success'] = True
             return response
 

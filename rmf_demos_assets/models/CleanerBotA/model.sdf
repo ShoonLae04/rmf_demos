@@ -9,12 +9,19 @@
     <plugin name="slotcar" filename="libslotcar.so">
 
       <!-- Forward / Backward -->
-      <nominal_drive_speed>0.7</nominal_drive_speed>
+      <!-- <nominal_drive_speed>0.7</nominal_drive_speed>
+      <nominal_drive_acceleration>0.5</nominal_drive_acceleration>
+      <max_drive_acceleration>0.6</max_drive_acceleration> -->
+
+      <nominal_drive_speed>2</nominal_drive_speed>
       <nominal_drive_acceleration>0.5</nominal_drive_acceleration>
       <max_drive_acceleration>0.6</max_drive_acceleration>
 
       <!-- Turning -->
-      <nominal_turn_speed>0.4</nominal_turn_speed>
+      <!-- <nominal_turn_speed>0.4</nominal_turn_speed>
+      <nominal_turn_acceleration>1.0</nominal_turn_acceleration>
+      <max_turn_acceleration>1.2</max_turn_acceleration> -->
+      <nominal_turn_speed>0.8</nominal_turn_speed>
       <nominal_turn_acceleration>1.0</nominal_turn_acceleration>
       <max_turn_acceleration>1.2</max_turn_acceleration>
 
@@ -103,6 +110,29 @@
           </friction>
         </surface>
       </collision>
+
+      <sensor name='front_laser' type='gpu_lidar'>
+        <pose frame=''>0.8 0 0.8 0 0 0</pose>
+        <always_on>1</always_on>
+        <update_rate>10</update_rate>
+        <visualize>false</visualize>
+        <topic>/cleanerbota_scan</topic>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>360</samples>
+              <resolution>1</resolution>
+              <min_angle>-1.5708</min_angle>
+              <max_angle>1.5708</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.05</min>
+            <max>8.0</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+      </sensor>
 
     </link>
 

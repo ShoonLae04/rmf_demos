@@ -1,0 +1,42 @@
+# The configuration file for docking actions that robots can perform
+# FleetName: The name of the fleet
+#   DockName: The name of the docking waypoint
+#     level_name: The level name
+#     path: The waypoints that the robot will pass through during the docking process
+#     finish_waypoint: The name of the waypoint where the robot will end up at the end of the docking process
+#
+# Note: These waypoints are in (x meters, y meters, yaw radian) form
+#
+# If loaded correctly, you will be able to echo the msg via:
+#   ros2 topic echo /dock_summary --qos-durability transient_local --qos-reliability reliable
+#
+# Configuring Cleaning path:
+#    The full cleaning path which the robot will travel along. When configuring, the first
+#    waypoint is required to be the current robot's waypoint.
+
+cleanerBotA:
+  clean_inno_room:
+    level_name: "L1"
+    # Note: These waypoints are in (x meters, y meters, yaw radian) form
+    # Keep the route tight to the room center to avoid wall contact.
+    path: [ [76.90, -28.00, 0.0],
+      [77.70, -27.45, 0.0],
+      [78.50, -27.55, 0.0],
+      [78.70, -28.10, 0.0],
+      [77.95, -28.35, 0.0],
+      [77.20, -28.20, 0.0]
+    ]
+    finish_waypoint: "clean_inno_room"
+    
+  clean_conference_room:
+    level_name: "L1"
+    # Keep the sweep inside the conference-room interior to avoid clipping the walls.
+    path: [ [79.30, -37.25, 0.0],
+      [79.85, -38.15, 0.0],
+      [79.55, -39.00, 0.0],
+      [78.55, -38.85, 0.0],
+      [78.20, -37.95, 0.0],
+      [78.80, -37.10, 0.0],
+      [79.30, -37.25, 0.0]
+    ]
+    finish_waypoint: "conference_room"

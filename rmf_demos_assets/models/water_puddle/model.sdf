@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<sdf version="1.7">
+  <model name="water_puddle">
+    <static>true</static>
+    <link name="link">
+      <pose>0 0 0.005 0 0 0</pose>
+      <collision name="collision">
+        <geometry>
+          <cylinder>
+            <radius>0.35</radius>
+            <length>0.01</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <cylinder>
+            <radius>0.35</radius>
+            <length>0.01</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.1 0.4 0.8 0.35</ambient>
+          <diffuse>0.1 0.4 0.8 0.35</diffuse>
+          <specular>0.2 0.4 0.6 0.2</specular>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>
