@@ -64,8 +64,8 @@
   </group>
 
   <arg name="building_file" default="$(find-pkg-share rmf_demos_maps)/katong_office/katong_office.building.yaml"/>
- <arg name="nav_graph_dir" default="/home/saikham/rmf_ws/install/rmf_demos_maps/share/rmf_demos_maps/maps/katong_office/nav_graphs"/>
-  <arg name="viz_config_file" default="/home/saikham/rmf_ws/src/rmf/rmf_demos/rmf_demos_maps/maps/katong_office/katong_office.rviz"/>
+ <arg name="nav_graph_dir" default="$(find-pkg-share rmf_demos_maps)/maps/katong_office/nav_graphs"/>
+  <arg name="viz_config_file" default="$(find-pkg-share rmf_demos_maps)/maps/katong_office/katong_office.rviz"/>
 
   <node pkg="rmf_building_map_tools" exec="building_map_server" args="$(var building_file)">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
@@ -106,7 +106,7 @@
     <arg name="fleet_name" value="TinyRobot"/>
     <arg name="use_sim_time" value="$(var use_sim_time)"/>
     <arg name="nav_graph_file" value="$(var nav_graph_dir)/0.yaml"/>
-    <arg name="config_file" value="/home/saikham/rmf_ws/src/rmf/rmf_demos/rmf_demos/config/katong_office/tinyRobot_katong_config.yaml"/>
+    <arg name="config_file" value="$(find-pkg-share rmf_demos)/config/katong_office/tinyRobot_katong_config.yaml"/>
   </include>
   
   <group if="$(var use_cleaner_fleet)">
@@ -114,7 +114,7 @@
       <arg name="fleet_name" value="CleanerBotA"/>
       <arg name="use_sim_time" value="$(var use_sim_time)"/>
       <arg name="nav_graph_file" value="$(var nav_graph_dir)/1.yaml"/>
-      <arg name="config_file" value="/home/saikham/rmf_ws/src/rmf/rmf_demos/rmf_demos/config/katong_office/cleanerBotA_config.yaml"/>
+      <arg name="config_file" value="$(find-pkg-share rmf_demos)/config/katong_office/cleanerBotA_config.yaml"/>
     </include>
   </group>
 
