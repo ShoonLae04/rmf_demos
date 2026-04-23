@@ -29,10 +29,8 @@ levels:
       - [49, 50, {motion_axis: [1, start], motion_degrees: [3, 90], motion_direction: [2, -1], name: [1, first_door], plugin: [1, normal], right_left_ratio: [3, 1], type: [1, double_hinged]}]
       - [7, 53, {motion_axis: [1, start], motion_degrees: [3, 90], motion_direction: [2, -1], name: [1, misc_room_door], plugin: [1, normal], right_left_ratio: [3, 1], type: [1, hinged]}]
       - [41, 42, {motion_axis: [1, start], motion_degrees: [3, 90], motion_direction: [2, -1], name: [1, meeting_room1_door], plugin: [1, normal], right_left_ratio: [3, 1], type: [1, hinged]}]
-    drawing:
-      filename: katong_office.png
       - [4, 15, {motion_axis: [1, start], motion_degrees: [3, 90], motion_direction: [2, 1], name: [1, hallway_door], plugin: [1, normal], right_left_ratio: [3, 1], type: [1, sliding]}]
-      - [41, 42, {motion_axis: [1, start], motion_degrees: [3, 90], motion_direction: [2, -1], name: [1, meeting_room1_door], plugin: [1, normal], right_left_ratio: [3, 1], type: [1, hinged]}]
+      
     drawing:
       filename: katong_office_floorplan.png
     elevation: 0
