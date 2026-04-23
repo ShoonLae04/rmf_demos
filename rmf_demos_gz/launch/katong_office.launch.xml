@@ -4,6 +4,9 @@
   <arg name="headless" default="false"/>
   <arg name="software_rendering" default="false"/>
   <arg name="map_name" default="katong_office"/>
+  <arg name="bidding_time_window" default="2.0"/>
+  <arg name="use_rmf_panel" default="false"/>
+  <arg name="dashboard_config_file" default=""/>
   <arg name="trigger_on_any_nearby" default="false"/>
   <arg name="use_cleaner_fleet" default="true"/>
   <arg name="use_mock_docker" default="true"/>
@@ -16,29 +19,24 @@
   <arg name="scan_motion_velocity_threshold" default="0.05"/>
   <arg name="use_test_obstacle_classifier" default="false"/>
   <arg name="test_classifier_mode" default="task_aware"/>
+  <arg name="test_classifier_task_aware_clean_type" default="puddle"/>
+  <arg name="test_classifier_task_aware_idle_type" default="unknown_obstacle"/>
   <arg name="test_classifier_fixed_type" default="intruder"/>
   <arg name="test_classifier_ground_truth_topic" default="/obstacle_ground_truth"/>
+  <arg name="use_incident_task_dispatcher" default="true"/>
+  <arg name="incident_clean_zone" default="clean_inno_room"/>
+  <arg name="incident_enabled_obstacle_types" default="puddle,water_puddle,spill,spills,stain,stains,litter,leaf,leaves,hair"/>
+  <arg name="incident_dispatch_cooldown_sec" default="180.0"/>
+  <arg name="incident_allow_while_clean_active" default="false"/>
+  <arg name="incident_min_confidence" default="0.6"/>
+  <arg name="incident_resume_clean_after_local_response" default="true"/>
+  <arg name="incident_remove_entity_on_clean" default="true"/>
+  <arg name="incident_strict_resume_mode" default="true"/>
   <arg name="server_uri" default="ws://localhost:8000/_internal"/>
-  <arg name="bidding_time_window" default="2.0"/>
+  <arg name="viz_initial_map" default="L1"/>
+  <let name="simulation_map_name" value="$(var map_name)"/>
 
-  <arg name="building_file" default="/home/shoonlaezayyar/rmf_ws/install/rmf_demos_maps/share/rmf_demos_maps/katong_office/katong_office.building.yaml"/>
-  <arg name="nav_graph_dir" default="/home/shoonlaezayyar/rmf_ws/install/rmf_demos_maps/share/rmf_demos_maps/maps/katong_office/nav_graphs"/>
-  <arg name="viz_config_file" default="$(find-pkg-share rmf_demos_maps)/maps/katong_office/katong_office.rviz"/>
-
-  <node pkg="rmf_building_map_tools" exec="building_map_server" args="$(var building_file)">
-    <param name="use_sim_time" value="$(var use_sim_time)"/>
-  </node>
-
-  <node pkg="rviz2" exec="rviz2" args="-d $(var viz_config_file)">
-    <param name="use_sim_time" value="$(var use_sim_time)"/>
-  </node>
-  
-  <node pkg="tf2_ros" exec="static_transform_publisher" name="map_to_world" 
-        args="0 0 0 0 0 0 map world">
-    <param name="use_sim_time" value="true"/>
-  </node>
-
-  <node pkg="rmf_traffic_ros2" exec="rmf_traffic_schedule" name="rmf_traffic_schedule_primary" output="both">
+  <node pkg="rmf_traffic_ros2" exec="rmf_traffic_schedule" output="both" name="rmf_traffic_schedule_primary">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
   </node>
 
@@ -59,15 +57,52 @@
     <param name="bidding_time_window" value="$(var bidding_time_window)"/>
   </node>
 
+  <group if="$(var use_rmf_panel)">
+    <include file="$(find-pkg-share rmf_demos)/dashboard.launch.xml">
+      <arg name="use_sim_time" value="$(var use_sim_time)"/>
+      <arg name="dashboard_config_file" value="$(var dashboard_config_file)"/>
+    </include>
+  </group>
+
+  <arg name="building_file" default="$(find-pkg-share rmf_demos_maps)/katong_office/katong_office.building.yaml"/>
+  <arg name="nav_graph_dir" default="$(find-pkg-share rmf_demos_maps)/maps/katong_office/nav_graphs"/>
+  <arg name="viz_config_file" default="$(find-pkg-share rmf_demos_maps)/maps/katong_office/katong_office.rviz"/>
+
+  <node pkg="rmf_building_map_tools" exec="building_map_server" args="$(var building_file)">
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+  </node>
+
+  <node pkg="rviz2" exec="rviz2" args="-d $(var viz_config_file)">
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+  </node>
+
   <include file="$(find-pkg-share rmf_demos_gz)/simulation.launch.xml">
-    <arg name="map_name" value="$(var map_name)" />
+    <arg name="map_name" value="$(var simulation_map_name)" />
     <arg name="headless" value="$(var headless)" />
     <arg name="software_rendering" value="$(var software_rendering)" />
     <arg name="use_sim_time" value="$(var use_sim_time)" />
   </include>
 
+  <include file="$(find-pkg-share rmf_visualization)/visualization.launch.xml">
+    <arg name="use_sim_time" value="$(var use_sim_time)"/>
+    <arg name="map_name" value="$(var viz_initial_map)"/>
+    <arg name="viz_config_file" value="$(var viz_config_file)"/>
+    <arg name="headless" value="true"/>
+  </include>
 
-  
+  <node pkg="tf2_ros" exec="static_transform_publisher" name="map_to_world"
+        args="0 0 0 0 0 0 map world">
+    <param name="use_sim_time" value="true"/>
+  </node>
+
+  <!-- Publish dock_summary early so cleaning zones are available before task submission -->
+  <group if="$(var use_mock_docker)">
+    <let name="docking_config_file" value="$(find-pkg-share rmf_demos_tasks)/katong_office_cleaner_config.yaml"/>
+    <node pkg="rmf_demos_tasks" exec="mock_docker" args="-c $(var docking_config_file)">
+      <param name="use_sim_time" value="$(var use_sim_time)"/>
+    </node>
+  </group>
+
   <include file="$(find-pkg-share rmf_demos_fleet_adapter)/launch/fleet_adapter.launch.xml">
     <arg name="fleet_name" value="TinyRobot"/>
     <arg name="use_sim_time" value="$(var use_sim_time)"/>
@@ -75,21 +110,15 @@
     <arg name="config_file" value="$(find-pkg-share rmf_demos)/config/katong_office/tinyRobot_katong_config.yaml"/>
     <arg name="server_uri" value="$(var server_uri)"/>
   </include>
-  
+
   <include file="$(find-pkg-share rmf_demos_fleet_adapter)/launch/fleet_adapter.launch.xml">
-
     <arg name="fleet_name" value="DeliveryRobot"/>
-
     <arg name="use_sim_time" value="$(var use_sim_time)"/>
-
     <arg name="nav_graph_file" value="$(var nav_graph_dir)/2.yaml"/>
-
     <arg name="config_file" value="$(find-pkg-share rmf_demos)/config/katong_office/DeliveryRobot_config.yaml"/>
-
     <arg name="server_uri" value="$(var server_uri)"/>
-
   </include>
-  
+
   <group if="$(var use_cleaner_fleet)">
     <include file="$(find-pkg-share rmf_demos_fleet_adapter)/launch/fleet_adapter.launch.xml">
       <arg name="fleet_name" value="CleanerBotA"/>
@@ -99,7 +128,46 @@
       <arg name="server_uri" value="$(var server_uri)"/>
     </include>
   </group>
-  
-  
+
+  <let name="perception_bridge_args" value=""/>
+  <let name="perception_bridge_args" if="$(var trigger_on_any_nearby)" value="--trigger-on-any-nearby"/>
+
+  <node pkg="rmf_demos_bridges" exec="perception_bridge" output="screen" args="$(var perception_bridge_args)"/>
+
+  <group if="$(var use_scan_obstacle_detector)">
+    <let name="scan_motion_flag" value=""/>
+    <let name="scan_motion_flag" if="$(var scan_require_motion)" value="--require-motion --motion-velocity-threshold $(var scan_motion_velocity_threshold)"/>
+    <node pkg="rmf_demos_bridges"
+          exec="scan_obstacle_detector"
+          output="screen"
+          args="--scan-topic $(var scan_topic) --min-consecutive-hits $(var scan_min_consecutive_hits) --no-auto-discover-scans $(var scan_motion_flag) --robot-name TinyRobot1 --classification-topic /obstacle_classifications"/>
+
+    <node pkg="rmf_demos_bridges"
+          exec="scan_obstacle_detector"
+          output="screen"
+          args="--scan-topic /cleanerbota_scan --min-consecutive-hits $(var scan_min_consecutive_hits) --no-auto-discover-scans $(var scan_motion_flag) --robot-name cleanerBotA_1 --classification-topic /obstacle_classifications"/>
+  </group>
+
+  <group if="$(var use_test_obstacle_classifier)">
+    <node pkg="rmf_demos_bridges"
+          exec="test_obstacle_classifier"
+          output="screen"
+          args="--mode $(var test_classifier_mode) --task-aware-clean-type $(var test_classifier_task_aware_clean_type) --task-aware-idle-type $(var test_classifier_task_aware_idle_type) --fixed-type $(var test_classifier_fixed_type) --ground-truth-topic $(var test_classifier_ground_truth_topic)"/>
+  </group>
+
+  <group if="$(var use_incident_task_dispatcher)">
+    <let name="incident_allow_active_flag" value=""/>
+    <let name="incident_allow_active_flag" if="$(var incident_allow_while_clean_active)" value="--allow-while-clean-active"/>
+    <let name="incident_resume_flag" value=""/>
+    <let name="incident_resume_flag" if="$(var incident_resume_clean_after_local_response)" value="--resume-clean-after-local-response"/>
+    <let name="incident_remove_flag" value=""/>
+    <let name="incident_remove_flag" if="$(var incident_remove_entity_on_clean)" value="--remove-entity-on-clean"/>
+    <let name="incident_strict_resume_flag" value=""/>
+    <let name="incident_strict_resume_flag" if="$(var incident_strict_resume_mode)" value="--strict-resume-mode"/>
+    <node pkg="rmf_demos_bridges"
+          exec="incident_task_dispatcher"
+          output="screen"
+          args="--clean-zone $(var incident_clean_zone) --enabled-obstacle-types $(var incident_enabled_obstacle_types) --cooldown-sec $(var incident_dispatch_cooldown_sec) --min-confidence $(var incident_min_confidence) $(var incident_allow_active_flag) $(var incident_resume_flag) $(var incident_remove_flag) $(var incident_strict_resume_flag)"/>
+  </group>
 
 </launch>
