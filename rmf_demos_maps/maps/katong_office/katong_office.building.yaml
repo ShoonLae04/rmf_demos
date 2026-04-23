@@ -1,6 +1,7 @@
 coordinate_system: reference_image
 crowd_sim:
   agent_groups:
+    - {agents_name: [TinyRobot1, cleanerBotA_1, DeliveryRobot1], agents_number: 3, group_id: 0, profile_selector: external_agent, state_selector: external_static, x: 0, y: 0}
     - {agents_name: [TinyRobot1, cleanerBotA_1], agents_number: 2, group_id: 0, profile_selector: external_agent, state_selector: external_static, x: 0, y: 0}
   agent_profiles:
     - {ORCA_tau: 1, ORCA_tauObst: 0.40000000000000002, class: 1, max_accel: 0, max_angle_vel: 0, max_neighbors: 10, max_speed: 0, name: external_agent, neighbor_dist: 5, obstacle_set: 1, pref_speed: 0, r: 0.25}
@@ -27,6 +28,9 @@ levels:
       - [45, 46, {motion_axis: [1, start], motion_degrees: [3, 90], motion_direction: [2, 1], name: [1, conference_room_door], plugin: [1, normal], right_left_ratio: [3, 1], type: [1, double_hinged]}]
       - [49, 50, {motion_axis: [1, start], motion_degrees: [3, 90], motion_direction: [2, -1], name: [1, first_door], plugin: [1, normal], right_left_ratio: [3, 1], type: [1, double_hinged]}]
       - [7, 53, {motion_axis: [1, start], motion_degrees: [3, 90], motion_direction: [2, -1], name: [1, misc_room_door], plugin: [1, normal], right_left_ratio: [3, 1], type: [1, hinged]}]
+      - [41, 42, {motion_axis: [1, start], motion_degrees: [3, 90], motion_direction: [2, -1], name: [1, meeting_room1_door], plugin: [1, normal], right_left_ratio: [3, 1], type: [1, hinged]}]
+    drawing:
+      filename: katong_office.png
       - [4, 15, {motion_axis: [1, start], motion_degrees: [3, 90], motion_direction: [2, 1], name: [1, hallway_door], plugin: [1, normal], right_left_ratio: [3, 1], type: [1, sliding]}]
       - [41, 42, {motion_axis: [1, start], motion_degrees: [3, 90], motion_direction: [2, -1], name: [1, meeting_room1_door], plugin: [1, normal], right_left_ratio: [3, 1], type: [1, hinged]}]
     drawing:
@@ -75,6 +79,14 @@ levels:
       - [229, 230, {bidirectional: [4, true], demo_mock_floor_name: [1, ""], demo_mock_lift_name: [1, ""], graph_idx: [2, 1], orientation: [1, ""], speed_limit: [3, 0]}]
       - [225, 229, {bidirectional: [4, true], demo_mock_floor_name: [1, ""], demo_mock_lift_name: [1, ""], graph_idx: [2, 0], orientation: [1, ""], speed_limit: [3, 0]}]
       - [229, 230, {bidirectional: [4, true], demo_mock_floor_name: [1, ""], demo_mock_lift_name: [1, ""], graph_idx: [2, 0], orientation: [1, ""], speed_limit: [3, 0]}]
+      - [232, 231, {bidirectional: [4, true], demo_mock_floor_name: [1, ""], demo_mock_lift_name: [1, ""], graph_idx: [2, 2], orientation: [1, ""], speed_limit: [3, 0]}]
+      - [231, 224, {bidirectional: [4, true], demo_mock_floor_name: [1, ""], demo_mock_lift_name: [1, ""], graph_idx: [2, 2], orientation: [1, ""], speed_limit: [3, 0]}]
+      - [224, 239, {bidirectional: [4, true], demo_mock_floor_name: [1, ""], demo_mock_lift_name: [1, ""], graph_idx: [2, 2], orientation: [1, ""], speed_limit: [3, 0]}]
+      - [239, 240, {bidirectional: [4, true], demo_mock_floor_name: [1, ""], demo_mock_lift_name: [1, ""], graph_idx: [2, 2], orientation: [1, ""], speed_limit: [3, 0]}]
+      - [240, 241, {bidirectional: [4, true], demo_mock_floor_name: [1, ""], demo_mock_lift_name: [1, ""], graph_idx: [2, 2], orientation: [1, ""], speed_limit: [3, 0]}]
+      - [232, 242, {bidirectional: [4, true], demo_mock_floor_name: [1, ""], demo_mock_lift_name: [1, ""], graph_idx: [2, 2], orientation: [1, ""], speed_limit: [3, 0]}]
+      - [239, 243, {bidirectional: [4, true], demo_mock_floor_name: [1, ""], demo_mock_lift_name: [1, ""], graph_idx: [2, 2], orientation: [1, ""], speed_limit: [3, 0]}]
+      - [243, 244, {bidirectional: [4, true], demo_mock_floor_name: [1, ""], demo_mock_lift_name: [1, ""], graph_idx: [2, 2], orientation: [1, ""], speed_limit: [3, 0]}]
     layers:
       {}
     measurements:
@@ -86,6 +98,9 @@ levels:
       - {dispensable: false, model_name: OpenRobotics/Table, name: OpenRobotics/Room_Table4, static: true, x: 952.10400000000004, y: 561.27800000000002, yaw: 1.5708, z: 0}
       - {dispensable: false, model_name: OpenRobotics/Table, name: OpenRobotics/Room_Table5, static: true, x: 951.827, y: 585.93100000000004, yaw: 1.5708, z: 0}
       - {dispensable: false, model_name: OpenRobotics/Table, name: OpenRobotics/Room_Table5, static: true, x: 951.827, y: 611.13800000000003, yaw: 1.5708, z: 0}
+      - {dispensable: false, model_name: OpenRobotics/TeleportDispenser, name: coke_dispenser, static: true, x: 1059.2829999999999, y: 297.92099999999999, yaw: 1.5708, z: 0}
+      - {dispensable: false, model_name: OpenRobotics/Coke, name: Coke, static: false, x: 1059.3030000000001, y: 297.93099999999998, yaw: 1.5708, z: 0}
+      - {dispensable: false, model_name: OpenRobotics/TeleportIngestor, name: coke_ingestor, static: true, x: 808.20100000000002, y: 476.36700000000002, yaw: 1.5708, z: 0}
     vertices:
       - [1.776, 1.754, 0, L1TL]
       - [0.61499999999999999, 676.73800000000006, 0, L1BL]
@@ -326,6 +341,12 @@ levels:
       - [986.548, 647.97500000000002, 0, ""]
       - [987.10500000000002, 480.303, 0, clean_conference_room, {dock_name: [1, clean_conference_room], is_cleaning_zone: [4, true]}]
       - [979.65999999999997, 450.51299999999998, 0, conference_room]
+      - [853.71000000000004, 447.83999999999997, 0, ""]
+      - [808.48800000000006, 447.83999999999997, 0, desk_person_a, {dropoff_ingestor: [1, coke_ingestor], is_holding_point: [4, true], is_parking_spot: [4, false]}]
+      - [778.822, 447.46199999999999, 0, desk_person_b, {dropoff_ingestor: [1, coke_ingestor], is_holding_point: [4, true], is_parking_spot: [4, false]}]
+      - [1073.6969999999999, 312.06, 0, reception_desk, {is_holding_point: [4, true], is_parking_spot: [4, false], pickup_dispenser: [1, coke_dispenser]}]
+      - [872.404, 474.983, 0, ""]
+      - [873.62800000000004, 510.46800000000002, 0, DeliveryRobot_charger, {is_charger: [4, true], is_holding_point: [4, false], is_parking_spot: [4, true], spawn_robot_name: [1, DeliveryRobot1], spawn_robot_type: [1, DeliveryRobot]}]
     walls:
       - [4, 5, {alpha: [3, 1], texture_height: [3, 2.5], texture_name: [1, default], texture_scale: [3, 1], texture_width: [3, 1]}]
       - [6, 7, {alpha: [3, 1], texture_height: [3, 2.5], texture_name: [1, default], texture_scale: [3, 1], texture_width: [3, 1]}]

@@ -1,0 +1,168 @@
+building_name: katong_office
+levels:
+  L1:
+    lanes:
+    - - 0
+      - 1
+      - {speed_limit: 0}
+    - - 1
+      - 0
+      - {speed_limit: 0}
+    - - 2
+      - 1
+      - {speed_limit: 0}
+    - - 1
+      - 2
+      - {speed_limit: 0}
+    - - 3
+      - 2
+      - {speed_limit: 0}
+    - - 2
+      - 3
+      - {speed_limit: 0}
+    - - 4
+      - 5
+      - {speed_limit: 0}
+    - - 5
+      - 4
+      - {speed_limit: 0}
+    - - 6
+      - 7
+      - {speed_limit: 0}
+    - - 7
+      - 6
+      - {speed_limit: 0}
+    - - 7
+      - 5
+      - {speed_limit: 0}
+    - - 5
+      - 7
+      - {speed_limit: 0}
+    - - 7
+      - 0
+      - {speed_limit: 0}
+    - - 0
+      - 7
+      - {speed_limit: 0}
+    - - 8
+      - 4
+      - {speed_limit: 0}
+    - - 4
+      - 8
+      - {speed_limit: 0}
+    - - 6
+      - 9
+      - {door_name: meeting_room1_door, speed_limit: 0}
+    - - 9
+      - 6
+      - {door_name: meeting_room1_door, speed_limit: 0}
+    - - 6
+      - 10
+      - {speed_limit: 0}
+    - - 10
+      - 6
+      - {speed_limit: 0}
+    - - 11
+      - 12
+      - {speed_limit: 0}
+    - - 12
+      - 11
+      - {speed_limit: 0}
+    - - 12
+      - 13
+      - {speed_limit: 0}
+    - - 13
+      - 12
+      - {speed_limit: 0}
+    - - 13
+      - 14
+      - {dock_name: clean_conference_room, speed_limit: 0}
+    - - 14
+      - 13
+      - {speed_limit: 0, undock_name: clean_conference_room}
+    - - 15
+      - 11
+      - {speed_limit: 0}
+    - - 11
+      - 15
+      - {speed_limit: 0}
+    - - 15
+      - 14
+      - {dock_name: clean_conference_room, speed_limit: 0}
+    - - 14
+      - 15
+      - {speed_limit: 0, undock_name: clean_conference_room}
+    - - 15
+      - 10
+      - {door_name: conference_room_door, speed_limit: 0}
+    - - 10
+      - 15
+      - {door_name: conference_room_door, speed_limit: 0}
+    - - 16
+      - 3
+      - {speed_limit: 0}
+    - - 3
+      - 16
+      - {speed_limit: 0}
+    - - 16
+      - 17
+      - {dock_name: clean_inno_room, speed_limit: 0}
+    - - 17
+      - 16
+      - {speed_limit: 0, undock_name: clean_inno_room}
+    vertices:
+    - - 85.58351261822173
+      - -32.73970102552467
+      - {name: ''}
+    - - 81.79770210409944
+      - -32.786498605972646
+      - {name: ''}
+    - - 69.37798173472335
+      - -32.614744986064615
+      - {name: ''}
+    - - 69.49075090427507
+      - -29.073159344905207
+      - {name: ''}
+    - - 89.89075867282166
+      - -25.428554030120743
+      - {name: ''}
+    - - 89.91025766467499
+      - -32.677710480590974
+      - {is_holding_point: false, is_passthrough_point: false, name: ''}
+    - - 87.97278908664906
+      - -35.606946531756606
+      - {name: ''}
+    - - 87.95751487636394
+      - -32.720283279470735
+      - {name: ''}
+    - - 92.64474753470553
+      - -25.407917597075976
+      - {is_charger: true, is_holding_point: true, is_parking_spot: true, name: cleanerbot_charger1,
+        spawn_robot_name: cleanerBotA_1, spawn_robot_type: CleanerBotA}
+    - - 92.41539064303082
+      - -35.6405010469042
+      - {name: meeting_room1}
+    - - 83.2437960874216
+      - -36.60228882006942
+      - {name: ''}
+    - - 73.81806467132405
+      - -36.510156083562464
+      - {name: ''}
+    - - 73.66548506007179
+      - -52.705287504739076
+      - {name: ''}
+    - - 80.15288089547215
+      - -52.64524685899071
+      - {name: ''}
+    - - 80.19813480573174
+      - -39.02260118386329
+      - {dock_name: clean_conference_room, is_cleaning_zone: true, name: clean_conference_room}
+    - - 79.59325982928173
+      - -36.60228882006942
+      - {name: conference_room}
+    - - 74.39791594156229
+      - -28.90831161794523
+      - {name: inno_room}
+    - - 82.05322014317737
+      - -23.972710550871927
+      - {dock_name: clean_inno_room, is_cleaning_zone: true, name: clean_inno_room}
