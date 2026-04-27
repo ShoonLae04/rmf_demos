@@ -5,3 +5,4 @@
 *.pyc
 __pycache__/
 *.py[cod]
+.rmf_schedule_node.yaml
